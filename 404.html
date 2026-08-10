@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>TokenBreja Casa</title>
+<style>
+:root{--p:#0f2744;--a:#1e4d8c;--g:#c9a227;--ok:#1f7a4d;--bad:#b91c1c;--bg:#f1f5f9;--c:#fff;--t:#0f172a;--m:#64748b;--b:#e2e8f0}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--t);max-width:480px;margin:0 auto;min-height:100vh;padding-bottom:28px}
+.top{background:linear-gradient(135deg,#0f2744,#1e4d8c);color:#fff;padding:16px;text-align:center;position:sticky;top:0;z-index:40}
+.top h1{font-size:1.25rem;font-weight:800;letter-spacing:.5px}
+.top p{font-size:.72rem;opacity:.9;margin-top:3px}
+.nav{display:flex;background:#fff;border-bottom:1px solid var(--b);position:sticky;top:62px;z-index:30;overflow-x:auto}
+.nav button{flex:1;min-width:70px;padding:11px 4px;border:none;background:0;font-size:.72rem;font-weight:700;color:var(--m);cursor:pointer;border-bottom:3px solid transparent}
+.nav button.on{color:var(--p);border-bottom-color:var(--g)}
+.pg{display:none;padding:14px}.pg.on{display:block}
+.card{background:var(--c);border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.card h3{font-size:.95rem;margin-bottom:10px;color:var(--p)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:11px;font-size:.9rem;font-weight:700;cursor:pointer;margin-top:8px}
+.btn-p{background:var(--p);color:#fff}.btn-g{background:var(--ok);color:#fff}.btn-gold{background:var(--g);color:#1a1a1a}
+.btn-o{background:#fff;border:1.5px solid var(--b);color:var(--t)}.btn-sm{padding:8px 12px;font-size:.78rem;width:auto;display:inline-block;margin:0}
+.row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f1f5f9;font-size:.88rem}
+.row:last-child{border-bottom:none}.muted{color:var(--m)}.small{font-size:.76rem;color:var(--m)}
+.badge{display:inline-block;padding:3px 9px;border-radius:999px;font-size:.68rem;font-weight:700;text-transform:uppercase}
+.b-ok{background:#dcfce7;color:var(--ok)}.b-wait{background:#ffedd5;color:#c2410c}.b-info{background:#dbeafe;color:var(--a)}.b-mut{background:#f1f5f9;color:#475569}
+input,select{width:100%;padding:11px;border:1px solid var(--b);border-radius:10px;font-size:.95rem;margin-bottom:8px}
+.rest{border:1.5px solid var(--b);border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer}
+.rest:active,.rest.sel{border-color:var(--g);background:#fffbeb}
+.rest strong{display:block;font-size:.95rem;margin-bottom:4px}
+.item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f1f5f9;gap:8px}
+.item .n{font-weight:600;font-size:.86rem}.item .pr{font-size:.8rem;color:var(--m)}
+.qty{display:flex;align-items:center;gap:8px}
+.qty button{width:30px;height:30px;border-radius:8px;border:1px solid var(--b);background:#fff;font-weight:700;cursor:pointer}
+.hero{background:linear-gradient(135deg,#1e3a5f,#0f2744);color:#fff;border-radius:14px;padding:18px;margin-bottom:12px;text-align:center}
+.hero h2{font-size:1.1rem;margin-bottom:8px}.hero p{font-size:.86rem;opacity:.92;line-height:1.45}
+.del{background:#f8fafc;border:1px solid var(--b);border-radius:12px;padding:12px;margin-bottom:10px}
+.del .ser{font-family:ui-monospace,monospace;font-size:.78rem;font-weight:700;color:var(--p)}
+.okbox{background:#f0fdf4;border:1px solid #bbf7d0;color:var(--ok);border-radius:10px;padding:10px;font-size:.84rem;margin:8px 0}
+.warn{background:#fffbeb;border:1px solid #fcd34d;border-radius:10px;padding:10px;font-size:.84rem;margin:8px 0}
+.hidden{display:none!important}.center{text-align:center}
+a.map{color:var(--a);font-weight:700;text-decoration:none;font-size:.82rem}
+
+.pix-overlay{position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:100;display:flex;align-items:flex-end;justify-content:center;padding:12px}
+.pix-sheet{background:#fff;border-radius:16px 16px 12px 12px;padding:20px;width:100%;max-width:460px;max-height:90vh;overflow-y:auto}
+.pix-qr{width:180px;height:180px;margin:12px auto;background:repeating-linear-gradient(90deg,#0f172a 0 2px,#fff 2px 4px),repeating-linear-gradient(#0f172a 0 2px,#fff 2px 4px);background-size:8px 8px;border-radius:12px;border:1px solid #e2e8f0;position:relative}
+.pix-qr::after{content:'PIX';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.85);font-weight:800;color:#0f2744;font-size:1.4rem;letter-spacing:2px}
+.pix-code{font-family:ui-monospace,monospace;font-size:.7rem;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px;word-break:break-all;margin:8px 0}
+.pix-timer{text-align:center;font-weight:700;color:#c9a227;margin:8px 0}
+.pix-steps{font-size:.82rem;color:#64748b;margin:8px 0 12px;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="top">
+  <h1>TOKENBREJA CASA</h1>
+  <p>Comanda na geladeira · cozinha · entrega</p>
+</div>
+<div class="nav" id="nav">
+  <button class="on" data-p="home">Início</button>
+  <button data-p="pedir">Pedir</button>
+  <button data-p="comanda">Comanda</button>
+  <button data-p="cozinha">Cozinha</button>
+  <button data-p="moto">Entregador</button>
+</div>
+
+<!-- HOME -->
+<div id="pg-home" class="pg on">
+  <div class="hero">
+    <h2>Sua comanda na geladeira</h2>
+    <p>Leia a TAG → abra o restaurante → monte → pague → solicite preparo.<br>Retire ou receba em casa. Sem WhatsApp quebrado.</p>
+  </div>
+  <div class="card">
+    <h3>Como funciona</h3>
+    <div class="row"><span>1</span><span>Escolhe o restaurante da TAG</span></div>
+    <div class="row"><span>2</span><span>Monta o pedido e paga (simulado)</span></div>
+    <div class="row"><span>3</span><span>Solicita preparo quando quiser</span></div>
+    <div class="row"><span>4</span><span>Acompanha status · retira ou entrega</span></div>
+  </div>
+  <div class="card">
+    <h3>Frete TokenBreja (tabela teste Poços)</h3>
+    <div class="row"><span>Até 3 km</span><span><strong>R$ 8,90</strong></span></div>
+    <div class="row"><span>3–6 km</span><span><strong>R$ 12,90</strong></span></div>
+    <div class="row"><span>6–10 km</span><span><strong>R$ 16,90</strong></span></div>
+    <div class="row"><span>Chuva / pico (18–21h sex-sáb)</span><span><strong>+ R$ 3,00</strong></span></div>
+    <p class="small" style="margin-top:8px;">Plataforma fixa a tabela. Motoboy recebe valor da corrida. Chuva e pico geram margem extra.</p>
+  </div>
+  
+  <div class="card">
+    <h3>Calculadora vs iFood (pedido R$ 100)</h3>
+    <div class="row"><span>iFood Plano Entrega (~26,5%)</span><span style="color:#b91c1c"><strong>− R$ 26,50</strong></span></div>
+    <div class="row"><span>Restaurante fica no iFood</span><span>R$ 73,50</span></div>
+    <hr style="border:none;border-top:1px solid #e2e8f0;margin:10px 0">
+    <div class="row"><span>TokenCasa · Pix (op 1%)</span><span style="color:#1f7a4d"><strong>− R$ 1,00</strong></span></div>
+    <div class="row"><span>TokenCasa · Cartão 1x (~3% + op 2%)</span><span>− R$ 5,00</span></div>
+    <div class="row"><span>Frete tabela (cliente paga)</span><span>R$ 8,90–16,90</span></div>
+    <div class="row"><span>Spread entrega (~5% do frete)</span><span style="color:#1f7a4d">+ TokenBreja</span></div>
+    <p class="small" style="margin-top:10px"><strong>Loja no Pix:</strong> quase o valor cheio. <strong>No cartão:</strong> ainda bem abaixo do iFood. Cliente fiel pela TAG na geladeira.</p>
+  </div>
+
+  <div class="card">
+    <h3>Restaurantes piloto</h3>
+    <p class="small">Beto Carnes · Gilbertinho · Lion BBQ · Gonçalves</p>
+    <button class="btn btn-gold" onclick="go('pedir')">Começar a pedir</button>
+  </div>
+</div>
+
+<!-- PEDIR -->
+<div id="pg-pedir" class="pg">
+  <div class="card" id="step-rest">
+    <h3>Escolha o restaurante</h3>
+    <div id="lista-rest"></div>
+  </div>
+  <div class="card hidden" id="step-menu">
+    <button class="btn btn-o btn-sm" onclick="voltarRest()" style="margin-bottom:10px">← Trocar restaurante</button>
+    <h3 id="menu-titulo">Cardápio</h3>
+    <div id="lista-menu"></div>
+    <div class="row" style="margin-top:10px"><span>Subtotal</span><span id="subtotal">R$ 0,00</span></div>
+    <button class="btn btn-p" onclick="irCheckout()">Continuar</button>
+  </div>
+  <div class="card hidden" id="step-check">
+    <h3>Pagamento e entrega</h3>
+    <label class="small">Seu endereço</label>
+    <input id="end-cli" value="Rua Elizabeth Aparecida Danza, 235 — Poços de Caldas">
+    <label class="small">Modo</label>
+    <select id="modo-ent">
+      <option value="entrega">Entrega</option>
+      <option value="retirada">Retirar no local</option>
+    </select>
+    <div class="row"><span>Itens</span><span id="ck-itens">R$ 0,00</span></div>
+    <div class="row"><span>Frete</span><span id="ck-frete">R$ 0,00</span></div>
+    <div class="row"><span>Taxa operação 1%</span><span id="ck-taxa">R$ 0,00</span></div>
+    <div class="row"><span><strong>Total</strong></span><span id="ck-total"><strong>R$ 0,00</strong></span></div>
+    <div class="warn">Fluxo <strong>Pix simulado</strong> — QR + copia-e-cola + confirmação. Em produção: gateway real (Mercado Pago / Efí).</div>
+    <button class="btn btn-g" onclick="abrirPix()">Pagar com Pix</button>
+  </div>
+</div>
+
+<div id="pix-modal" class="pix-overlay hidden">
+  <div class="pix-sheet">
+    <h3 style="color:#0f2744;margin-bottom:4px">Pagamento Pix</h3>
+    <p class="small" id="pix-valor-label">Total a pagar</p>
+    <div class="pix-qr" id="pix-qr" title="QR Code simulado"></div>
+    <p class="pix-timer" id="pix-timer">Expira em 10:00</p>
+    <p class="pix-steps">1. Abra o app do seu banco<br>2. Escaneie o QR ou cole o código<br>3. Confirme o pagamento</p>
+    <div class="pix-code" id="pix-code">00020126580014br.gov.bcb.pix...</div>
+    <button class="btn btn-o" onclick="copiarPix()">Copiar código Pix</button>
+    <button class="btn btn-g" id="btn-pix-pago" onclick="confirmarPixPago()">Já paguei — confirmar</button>
+    <button class="btn btn-o" onclick="fecharPix()">Cancelar</button>
+    <p class="small center" style="margin-top:8px">Demo: nenhum valor é cobrado de verdade</p>
+  </div>
+</div>
+
+
+<!-- COMANDA -->
+<div id="pg-comanda" class="pg">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <span class="badge b-mut" id="cmd-badge">VAZIA</span>
+      <span class="small" id="cmd-rest">—</span>
+    </div>
+    <div class="row"><span class="muted">Serial comanda</span><span id="cmd-serial" style="font-family:monospace;font-weight:700">CASA-DEMO-001</span></div>
+    <div class="row"><span class="muted">Crédito / itens</span><span id="cmd-saldo">0</span></div>
+    <div class="row"><span class="muted">Status</span><span id="cmd-status">Sem pedido ativo</span></div>
+  </div>
+  <div class="card">
+    <h3>Itens na comanda</h3>
+    <div id="cmd-itens"><p class="small">Nenhum item creditado ainda</p></div>
+    <button class="btn btn-gold hidden" id="btn-solicitar" onclick="solicitarPreparo()">Solicitar preparo agora</button>
+  </div>
+  <div class="card">
+    <h3>Entrega</h3>
+    <div class="row"><span class="muted">Modo</span><span id="cmd-modo">—</span></div>
+    <div class="row"><span class="muted">Frete</span><span id="cmd-frete">—</span></div>
+    <div class="row"><span class="muted">Endereço</span><span id="cmd-end" class="small" style="max-width:55%;text-align:right">—</span></div>
+  </div>
+</div>
+
+<!-- COZINHA -->
+<div id="pg-cozinha" class="pg">
+  <div class="card">
+    <h3>🔥 Cozinha (3 restaurantes)</h3>
+    <p class="small">Pedidos pagos · aceite · preparo · pronto → fila de entrega</p>
+  </div>
+  <div class="card"><h3>Para aceite</h3><div id="kz-aceite"><p class="small">Nenhum</p></div></div>
+  <div class="card"><h3>Em preparo</h3><div id="kz-prep"><p class="small">Nenhum</p></div></div>
+  <div class="card"><h3>Prontos (liberar entrega)</h3><div id="kz-pronto"><p class="small">Nenhum</p></div></div>
+</div>
+
+<!-- MOTO -->
+<div id="pg-moto" class="pg">
+  <div class="card" id="moto-login">
+    <h3>Acesso entregador</h3>
+    <p class="small" style="margin-bottom:8px;">Serial da TAG do entregador + senha</p>
+    <input id="moto-serial" value="MOTO-PC-001" placeholder="Serial TAG">
+    <input id="moto-pass" type="password" value="1234" placeholder="Senha">
+    <button class="btn btn-p" onclick="loginMoto()">Entrar</button>
+    <p class="small center" style="margin-top:8px">Demo: MOTO-PC-001 · senha 1234</p>
+  </div>
+  <div id="moto-app" class="hidden">
+    <div class="card">
+      <p class="small">Entregador: <strong id="moto-nome">—</strong> · <span id="moto-tag">—</span></p>
+      <div class="row"><span>Corridas hoje</span><span id="moto-n">0</span></div>
+      <div class="row"><span>A receber hoje</span><span id="moto-$$">R$ 0,00</span></div>
+      <button class="btn btn-o btn-sm" onclick="logoutMoto()" style="margin-top:8px">Sair</button>
+    </div>
+    <div class="card">
+      <h3>Corridas disponíveis</h3>
+      <p class="small" style="margin-bottom:8px">Origem (restaurante) → destino (cliente). Abra no mapa.</p>
+      <div id="moto-lista"><p class="small">Nenhuma corrida pronta</p></div>
+    </div>
+    <div class="card">
+      <h3>Minhas corridas</h3>
+      <div id="moto-minhas"><p class="small">Nenhuma</p></div>
+      <button class="btn btn-g" onclick="fecharDia()">Fechar o dia e liquidar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const RESTS = {
+  gilbertinho: {
+    id:'gilbertinho', nome:'Gilbertinho Pizzaria',
+    end:'R. João Batista Pansini, 177 — N. Sra. Aparecida',
+    ig:'@gilbertinhopizzabar', tel:'(35) 3721-7854',
+    menu:[
+      {id:'g1', n:'Pizza À Moda Gilbertinho', pr:62},
+      {id:'g2', n:'Pizza Calabresa', pr:52},
+      {id:'g3', n:'Pizza Mussarela', pr:48},
+      {id:'g4', n:'Pizza Palmito', pr:58},
+      {id:'g5', n:'Double Pizza (2 sabores)', pr:120},
+      {id:'g6', n:'Jiló do Mário', pr:32},
+      {id:'g7', n:'Porção Costelinha c/ mandioca', pr:48}
+    ]
+  },
+  lion: {
+    id:'lion', nome:'Lion BBQ Burger',
+    end:'R. Assis Figueiredo, 1505 — Centro',
+    ig:'@lionbbq', tel:'(35) 99779-1505',
+    menu:[
+      {id:'l1', n:'Burger Clássico Angus', pr:39},
+      {id:'l2', n:'Burger Canastra BBQ', pr:45},
+      {id:'l3', n:'Burger Wagyu', pr:69},
+      {id:'l4', n:'Fritas Cheddar e Bacon', pr:49.99},
+      {id:'l5', n:'Polenta Queijuda', pr:35.99},
+      {id:'l6', n:'Tekeños', pr:19.99},
+      {id:'l7', n:'Combo Burger + Fritas', pr:59}
+    ]
+  },
+  goncalves: {
+    id:'goncalves', nome:'Cervejaria Gonçalves',
+    end:'Av. Mansur Frayha, 647 — Jd. Elizabete',
+    ig:'@cervejariagoncalves', tel:'(35) 3064-9313',
+    menu:[
+      {id:'c1', n:'Chope Hop Lager 500ml', pr:18},
+      {id:'c2', n:"Chope Uai's Weiss 500ml", pr:19},
+      {id:'c3', n:'Chope IPA We Will Hop You', pr:22},
+      {id:'c4', n:'Porção Batata Frita', pr:28},
+      {id:'c5', n:'Pastel de Queijo c/ goiabada', pr:26},
+      {id:'c6', n:'Tábua de Frios', pr:49},
+      {id:'c7', n:'Balde de Frango', pr:42}
+    ]
+  },
+  beto: {
+    id:'beto', nome:'Frango Assado do Beto',
+    end:'Rua Capitão Afonso Junqueira — Poços de Caldas',
+    ig:'iFood · Smart Foods', tel:'Pedido mín. R$ 49,90',
+    menu:[
+      {id:'b1', n:'Frango Assado Inteiro', pr:55},
+      {id:'b2', n:'Meio Frango Assado', pr:32},
+      {id:'b3', n:'Kit Família (frango + farofa + maionese + batata)', pr:79},
+      {id:'b4', n:'Costela Suína Assada (kg)', pr:68},
+      {id:'b5', n:'Linguiça Toscana na Brasa (un)', pr:8},
+      {id:'b6', n:'Porção Batata Assada', pr:18},
+      {id:'b7', n:'Maionese Caseira', pr:15},
+      {id:'b8', n:'Farofa da Casa', pr:12}
+    ]
+  }
+};
+
+let restId = null;
+let cart = {};
+let comanda = { serial:'CASA-DEMO-001', rest:null, itens:[], status:'vazio', modo:'entrega', frete:0, end:'', pago:false };
+let pedidos = []; // cozinha + entrega
+let moto = { logado:false, serial:'', nome:'', corridas:[], ganho:0 };
+let seq = 1;
+
+function money(v){ return 'R$ ' + Number(v).toFixed(2).replace('.',','); }
+function go(id){
+  document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('on'));
+  document.getElementById('pg-'+id).classList.add('on');
+  const btn=[...document.querySelectorAll('.nav button')].find(b=>b.dataset.p===id);
+  if(btn) btn.classList.add('on');
+  if(id==='cozinha') renderCozinha();
+  if(id==='moto') renderMoto();
+  if(id==='comanda') renderComanda();
+}
+
+function calcFrete(){
+  // Demo: distância simulada por restaurante
+  const base = { gilbertinho:12.90, lion:8.90, goncalves:12.90, beto:10.90 };
+  let f = base[restId] || 12.90;
+  const h = new Date().getHours();
+  const d = new Date().getDay();
+  const pico = (d===5||d===6) && h>=18 && h<=21;
+  if(pico) f += 3;
+  // chuva simulada: toggle interno
+  if(window._chuva) f += 3;
+  return f;
+}
+
+function renderRests(){
+  const el=document.getElementById('lista-rest');
+  el.innerHTML = Object.values(RESTS).map(r=>`
+    <div class="rest" onclick="escolherRest('${r.id}')">
+      <strong>${r.nome}</strong>
+      <span class="small">${r.end}</span><br>
+      <span class="small">${r.ig} · ${r.tel}</span>
+    </div>`).join('');
+}
+function escolherRest(id){
+  restId=id; cart={};
+  document.getElementById('step-rest').classList.add('hidden');
+  document.getElementById('step-menu').classList.remove('hidden');
+  document.getElementById('step-check').classList.add('hidden');
+  document.getElementById('menu-titulo').textContent = RESTS[id].nome;
+  renderMenu();
+}
+function voltarRest(){
+  document.getElementById('step-rest').classList.remove('hidden');
+  document.getElementById('step-menu').classList.add('hidden');
+  document.getElementById('step-check').classList.add('hidden');
+}
+function renderMenu(){
+  const r=RESTS[restId];
+  document.getElementById('lista-menu').innerHTML = r.menu.map(i=>{
+    const q=cart[i.id]||0;
+    return `<div class="item"><div><div class="n">${i.n}</div><div class="pr">${money(i.pr)}</div></div>
+      <div class="qty"><button onclick="chg('${i.id}',-1)">−</button><span>${q}</span><button onclick="chg('${i.id}',1)">+</button></div></div>`;
+  }).join('');
+  let s=0; r.menu.forEach(i=>{s+=(cart[i.id]||0)*i.pr});
+  document.getElementById('subtotal').textContent=money(s);
+}
+function chg(id,d){
+  cart[id]=Math.max(0,(cart[id]||0)+d);
+  renderMenu();
+}
+function irCheckout(){
+  const r=RESTS[restId];
+  let s=0; r.menu.forEach(i=>{s+=(cart[i.id]||0)*i.pr});
+  if(s<=0){ alert('Selecione itens'); return; }
+  document.getElementById('step-menu').classList.add('hidden');
+  document.getElementById('step-check').classList.remove('hidden');
+  atualizarCheckout();
+  document.getElementById('modo-ent').onchange = atualizarCheckout;
+}
+function atualizarCheckout(){
+  const r=RESTS[restId];
+  let s=0; r.menu.forEach(i=>{s+=(cart[i.id]||0)*i.pr});
+  const modo=document.getElementById('modo-ent').value;
+  const frete = modo==='entrega' ? calcFrete() : 0;
+  const taxa = (s+frete)*0.01;
+  document.getElementById('ck-itens').textContent=money(s);
+  document.getElementById('ck-frete').textContent=money(frete);
+  document.getElementById('ck-taxa').textContent=money(taxa);
+  document.getElementById('ck-total').innerHTML='<strong>'+money(s+frete+taxa)+'</strong>';
+}
+let pixTimer=null, pixSec=600, pixTotal=0, pixPayload='';
+
+function montarItensCheckout(){
+  const r=RESTS[restId];
+  let itens=[]; let s=0;
+  r.menu.forEach(i=>{
+    const q=cart[i.id]||0;
+    if(q>0){ itens.push({id:i.id,n:i.n,qtd:q,pr:i.pr}); s+=q*i.pr; }
+  });
+  const modo=document.getElementById('modo-ent').value;
+  const frete=modo==='entrega'?calcFrete():0;
+  const taxa=(s+frete)*0.01;
+  return {r,itens,s,modo,frete,taxa,total:s+frete+taxa};
+}
+
+function gerarPixCopiaCola(valor){
+  // EMV-like fake payload for demo (not a real charge)
+  const v=Number(valor).toFixed(2);
+  const tx='TB'+Date.now().toString(36).toUpperCase();
+  return '00020126580014br.gov.bcb.pix0136tokenbreja-casa-demo-'+tx+'520400005303986540'+v.length+v+'5802BR5913TokenBreja Casa6009Pocos MG62070503***6304ABCD';
+}
+
+function abrirPix(){
+  const data=montarItensCheckout();
+  if(data.s<=0){ alert('Selecione itens'); return; }
+  pixTotal=data.total;
+  pixPayload=gerarPixCopiaCola(pixTotal);
+  pixSec=600;
+  document.getElementById('pix-valor-label').innerHTML='Total <strong>'+money(pixTotal)+'</strong> · '+data.r.nome;
+  document.getElementById('pix-code').textContent=pixPayload;
+  document.getElementById('pix-modal').classList.remove('hidden');
+  document.getElementById('btn-pix-pago').disabled=false;
+  document.getElementById('btn-pix-pago').textContent='Já paguei — confirmar';
+  if(pixTimer) clearInterval(pixTimer);
+  tickPix();
+  pixTimer=setInterval(tickPix,1000);
+}
+
+function tickPix(){
+  const m=Math.floor(pixSec/60), s=pixSec%60;
+  document.getElementById('pix-timer').textContent= pixSec>0
+    ? ('Expira em '+m+':'+String(s).padStart(2,'0'))
+    : 'Código expirado — gere de novo';
+  if(pixSec<=0){ clearInterval(pixTimer); document.getElementById('btn-pix-pago').disabled=true; return; }
+  pixSec--;
+}
+
+function fecharPix(){
+  document.getElementById('pix-modal').classList.add('hidden');
+  if(pixTimer) clearInterval(pixTimer);
+}
+
+function copiarPix(){
+  const t=document.getElementById('pix-code').textContent;
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(t).then(()=>alert('Código Pix copiado!')).catch(()=>alert('Copie manualmente o código.'));
+  } else {
+    prompt('Copie o código Pix:', t);
+  }
+}
+
+function confirmarPixPago(){
+  // Simula consulta ao gateway: "pagamento aprovado"
+  const btn=document.getElementById('btn-pix-pago');
+  btn.disabled=true;
+  btn.textContent='Confirmando Pix…';
+  setTimeout(function(){
+    const data=montarItensCheckout();
+    comanda = {
+      serial:'CASA-'+restId.toUpperCase().slice(0,3)+'-'+String(seq).padStart(3,'0'),
+      rest:restId, itens:data.itens, status:'creditado', modo:data.modo, frete:data.frete,
+      end:document.getElementById('end-cli').value, pago:true,
+      pixId:'PIX-DEMO-'+Date.now().toString(36).toUpperCase(),
+      pixValor:pixTotal
+    };
+    seq++;
+    cart={};
+    fecharPix();
+    alert('Pix aprovado (simulado).\nID: '+comanda.pixId+'\nValor: '+money(comanda.pixValor)+'\nCrédito na comanda '+comanda.serial);
+    go('comanda');
+    renderComanda();
+  }, 1200);
+}
+
+function pagarSimulado(){ abrirPix(); }
+
+function renderComanda(){
+  if(!comanda.pago){
+    document.getElementById('cmd-badge').textContent='VAZIA';
+    document.getElementById('cmd-badge').className='badge b-mut';
+    document.getElementById('cmd-rest').textContent='—';
+    document.getElementById('cmd-saldo').textContent='0';
+    document.getElementById('cmd-status').textContent='Sem pedido ativo';
+    document.getElementById('cmd-itens').innerHTML='<p class="small">Nenhum item creditado ainda</p>';
+    document.getElementById('btn-solicitar').classList.add('hidden');
+    return;
+  }
+  const r=RESTS[comanda.rest];
+  document.getElementById('cmd-serial').textContent=comanda.serial;
+  document.getElementById('cmd-rest').textContent=r.nome;
+  document.getElementById('cmd-saldo').textContent=comanda.itens.reduce((a,i)=>a+i.qtd,0)+' itens';
+  document.getElementById('cmd-modo').textContent=comanda.modo==='entrega'?'Entrega':'Retirada';
+  document.getElementById('cmd-frete').textContent=money(comanda.frete);
+  document.getElementById('cmd-end').textContent=comanda.end;
+  const stMap={creditado:['CRÉDITO','b-info','Pago · pode solicitar preparo'],solicitado:['SOLICITADO','b-wait','Aguardando cozinha'],preparo:['PREPARO','b-wait','Cozinha preparando'],pronto:['PRONTO','b-ok','Pronto · retirada/entrega'],entregue:['ENTREGUE','b-ok','Finalizado']};
+  const m=stMap[comanda.status]||stMap.creditado;
+  document.getElementById('cmd-badge').textContent=m[0];
+  document.getElementById('cmd-badge').className='badge '+m[1];
+  document.getElementById('cmd-status').textContent=m[2];
+  document.getElementById('cmd-itens').innerHTML=comanda.itens.map(i=>`<div class="row"><span>${i.qtd}x ${i.n}</span><span>${money(i.qtd*i.pr)}</span></div>`).join('');
+  document.getElementById('btn-solicitar').classList.toggle('hidden', comanda.status!=='creditado');
+}
+function solicitarPreparo(){
+  if(comanda.status!=='creditado') return;
+  comanda.status='solicitado';
+  const r=RESTS[comanda.rest];
+  pedidos.push({
+    id:'P'+Date.now(), serial:comanda.serial, rest:comanda.rest, restNome:r.nome,
+    restEnd:r.end, itens:comanda.itens.slice(), status:'solicitado',
+    modo:comanda.modo, frete:comanda.frete, end:comanda.end,
+    valorMotoboy: Math.max(6, comanda.frete - 2.5) // plataforma fica com spread
+  });
+  renderComanda();
+  alert('Preparo solicitado!\nCozinha recebeu o pedido pago.');
+  go('cozinha');
+}
+
+function renderCozinha(){
+  const a=pedidos.filter(p=>p.status==='solicitado');
+  const e=pedidos.filter(p=>p.status==='preparo');
+  const p=pedidos.filter(p=>p.status==='pronto');
+  const card=(x,btns)=>`<div class="del"><div class="ser">${x.serial}</div>
+    <strong>${x.restNome}</strong>
+    <div class="small">${x.itens.map(i=>i.qtd+'x '+i.n).join(', ')}</div>
+    <div class="small">${x.modo} · frete ${money(x.frete)}</div>
+    <div style="margin-top:8px">${btns}</div></div>`;
+  document.getElementById('kz-aceite').innerHTML=a.length?a.map(x=>card(x,
+    `<button class="btn btn-sm btn-gold" onclick="kz('${x.id}','preparo')">Aceitar preparo</button>`)).join(''):'<p class="small">Nenhum</p>';
+  document.getElementById('kz-prep').innerHTML=e.length?e.map(x=>card(x,
+    `<button class="btn btn-sm btn-g" onclick="kz('${x.id}','pronto')">Marcar pronto</button>`)).join(''):'<p class="small">Nenhum</p>';
+  document.getElementById('kz-pronto').innerHTML=p.length?p.map(x=>card(x,
+    x.modo==='entrega'?`<span class="badge b-ok">Na fila dos entregadores</span>`:
+    `<button class="btn btn-sm btn-p" onclick="kz('${x.id}','entregue')">Cliente retirou</button>`)).join(''):'<p class="small">Nenhum</p>';
+}
+function kz(id,st){
+  const p=pedidos.find(x=>x.id===id); if(!p) return;
+  p.status=st;
+  if(comanda.serial===p.serial) comanda.status=st==='entregue'?'entregue':st;
+  renderCozinha(); renderComanda();
+  if(st==='pronto' && p.modo==='entrega') alert('Pedido pronto!\nEntregadores já veem a corrida.');
+}
+
+function loginMoto(){
+  if(document.getElementById('moto-pass').value!=='1234'){ alert('Senha 1234'); return; }
+  moto.logado=true;
+  moto.serial=document.getElementById('moto-serial').value||'MOTO-PC-001';
+  moto.nome='Entregador Demo';
+  document.getElementById('moto-login').classList.add('hidden');
+  document.getElementById('moto-app').classList.remove('hidden');
+  document.getElementById('moto-nome').textContent=moto.nome;
+  document.getElementById('moto-tag').textContent=moto.serial;
+  renderMoto();
+}
+function logoutMoto(){
+  moto.logado=false;
+  document.getElementById('moto-login').classList.remove('hidden');
+  document.getElementById('moto-app').classList.add('hidden');
+}
+function mapsLink(origem, destino){
+  const o=encodeURIComponent(origem+', Poços de Caldas MG');
+  const d=encodeURIComponent(destino+', Poços de Caldas MG');
+  return `https://www.google.com/maps/dir/?api=1&origin=${o}&destination=${d}&travelmode=driving`;
+}
+function renderMoto(){
+  if(!moto.logado) return;
+  const disp=pedidos.filter(p=>p.status==='pronto'&&p.modo==='entrega'&&!p.moto);
+  document.getElementById('moto-lista').innerHTML=disp.length?disp.map(p=>`
+    <div class="del">
+      <div class="ser">${p.serial}</div>
+      <strong>${p.restNome}</strong>
+      <div class="small">De: ${p.restEnd}</div>
+      <div class="small">Para: ${p.end}</div>
+      <div class="row"><span>Você recebe</span><span><strong>${money(p.valorMotoboy)}</strong></span></div>
+      <a class="map" target="_blank" href="${mapsLink(p.restEnd,p.end)}">📍 Abrir rota no Google Maps</a>
+      <button class="btn btn-g" style="margin-top:8px" onclick="pegarCorrida('${p.id}')">Coletar no restaurante</button>
+    </div>`).join(''):'<p class="small">Nenhuma corrida pronta</p>';
+  const minhas=pedidos.filter(p=>p.moto===moto.serial);
+  document.getElementById('moto-minhas').innerHTML=minhas.length?minhas.map(p=>`
+    <div class="del">
+      <div class="ser">${p.serial} · ${p.status}</div>
+      <div class="small">${p.restNome} → cliente</div>
+      <div class="small">${money(p.valorMotoboy)}</div>
+      ${p.status==='em_rota'?`<button class="btn btn-sm btn-p" onclick="entregarCorrida('${p.id}')">Confirmar entrega</button>`:''}
+      ${p.status==='coletando'?`<button class="btn btn-sm btn-gold" onclick="sairRota('${p.id}')">Saiu para entrega</button>`:''}
+    </div>`).join(''):'<p class="small">Nenhuma</p>';
+  document.getElementById('moto-n').textContent=minhas.filter(p=>p.status==='entregue').length;
+  document.getElementById('moto-$$').textContent=money(moto.ganho);
+}
+function pegarCorrida(id){
+  const p=pedidos.find(x=>x.id===id); if(!p||p.moto) return;
+  p.moto=moto.serial; p.status='coletando';
+  // restaurante "leu TAG da moto" = crédito liberado conceito
+  alert('Coleta aceita.\nRestaurante confirma saída com sua TAG '+moto.serial+'.\nAbra o mapa e vá até a cozinha.');
+  renderMoto(); renderCozinha();
+}
+function sairRota(id){
+  const p=pedidos.find(x=>x.id===id); if(!p) return;
+  p.status='em_rota';
+  renderMoto();
+}
+function entregarCorrida(id){
+  const p=pedidos.find(x=>x.id===id); if(!p) return;
+  p.status='entregue';
+  moto.ganho += p.valorMotoboy;
+  if(comanda.serial===p.serial) comanda.status='entregue';
+  alert('Entrega confirmada.\n+' + money(p.valorMotoboy) + ' no seu dia.');
+  renderMoto(); renderComanda();
+}
+function fecharDia(){
+  alert('Dia fechado.\nCorridas pagas: '+money(moto.ganho)+'\nLiquidação TokenBreja → entregador (simulado).');
+}
+
+document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>go(b.dataset.p));
+renderRests();
+// query ?modo=moto
+if(/moto|entregador/i.test(location.search+location.pathname)) go('moto');
+</script>
+</body>
+</html>
